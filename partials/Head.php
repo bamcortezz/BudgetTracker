@@ -10,6 +10,7 @@
    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
    <script src="assets/js/toast.js"></script>
+   <script src="assets/js/togglePassword.js"></script>
    <style>
       @keyframes float {
 

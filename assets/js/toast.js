@@ -23,23 +23,3 @@ function showToast(message, type = "success", duration = 3000) {
     },
   }).showToast();
 }
-
-/**
- * Toggle password visibility
- * @param {string} inputId - The ID of the password input field
- * @param {string} iconId - The ID of the toggle icon element
- */
-function togglePassword(inputId, iconId) {
-  const input = document.getElementById(inputId);
-  const icon = document.getElementById(iconId);
-
-  if (input.type === "password") {
-    input.type = "text";
-    icon.classList.remove("fa-eye");
-    icon.classList.add("fa-eye-slash");
-  } else {
-    input.type = "password";
-    icon.classList.remove("fa-eye-slash");
-    icon.classList.add("fa-eye");
-  }
-}

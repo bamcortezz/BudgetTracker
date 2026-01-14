@@ -1,22 +1,13 @@
 <?php
 require_once __DIR__ . "/config/Config.php";
+require_once __DIR__ . "/middleware/AuthMiddleware.php";
 require_once __DIR__ . "/utils/CsrfUtil.php";
 require_once __DIR__ . "/partials/Head.php";
 ?>
 
 <body class="bg-rose-50 font-sans text-gray-800 min-h-screen flex flex-col">
 
-   <nav
-      class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center shadow-sm fixed w-full top-0 z-50">
-      <div class="flex items-center gap-2">
-         <a href="index.php" class="flex items-center gap-2">
-            <div class="bg-rose-400 p-2 rounded-lg text-white">
-               <i class="fa-solid fa-wallet text-sm"></i>
-            </div>
-            <span class="text-xl font-bold text-rose-600 tracking-tight">BudgetTracker</span>
-         </a>
-      </div>
-   </nav>
+   <?php require_once __DIR__ . "/partials/Navbar.php"; ?>
 
    <main class="flex-grow flex items-center justify-center pt-24 pb-12 px-6">
       <div class="w-full max-w-md">

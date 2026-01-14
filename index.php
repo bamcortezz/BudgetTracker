@@ -1,22 +1,12 @@
-<?php require_once __DIR__ . "/partials/Head.php"; ?>
+<?php
+require_once __DIR__ . "/config/Config.php";
+require_once __DIR__ . "/middleware/AuthMiddleware.php";
+require_once __DIR__ . "/partials/Head.php";
+?>
 
 <body class="bg-rose-50 font-sans text-gray-800 min-h-screen flex flex-col">
 
-   <nav
-      class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center shadow-sm fixed w-full top-0 z-50">
-      <div class="flex items-center gap-2">
-         <div class="bg-rose-400 p-2 rounded-lg text-white">
-            <i class="fa-solid fa-wallet text-sm"></i>
-         </div>
-         <span class="text-xl font-bold text-rose-600 tracking-tight">BudgetTracker</span>
-      </div>
-      <div>
-         <a href="login.php"
-            class="text-rose-600 hover:text-rose-700 font-semibold px-4 py-2 rounded-lg transition-colors">
-            Login
-         </a>
-      </div>
-   </nav>
+   <?php require_once __DIR__ . "/partials/Navbar.php"; ?>
 
    <main class="flex-grow flex items-center justify-center pt-28 pb-16 px-6">
       <div class="container max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
@@ -31,10 +21,17 @@
                Experience financial peace of mind.
             </p>
             <div class="flex justify-center lg:justify-start mb-4">
-               <a href="register.php"
-                  class="inline-block bg-rose-500 hover:bg-rose-600 text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-xl shadow-rose-200 transition-all hover:-translate-y-1 text-center">
-                  Create Free Account
-               </a>
+               <?php if (AuthMiddleware::isAuthenticated()): ?>
+                  <a href="dashboard.php"
+                     class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-rose-200 transition-all active:scale-95 lg:hover:-translate-y-1 text-center">
+                     Go to Dashboard
+                  </a>
+               <?php else: ?>
+                  <a href="register.php"
+                     class="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-rose-200 transition-all active:scale-95 lg:hover:-translate-y-1 text-center">
+                     Create Free Account
+                  </a>
+               <?php endif; ?>
             </div>
          </div>
 
