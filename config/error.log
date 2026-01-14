@@ -37,3 +37,8 @@ Stack trace:
 #0 /Users/bamcortez/Documents/Code/BudgetTracker/login.php(9): require_once()
 #1 {main}
   thrown in /Users/bamcortez/Documents/Code/BudgetTracker/partials/Navbar.php on line 4
+[14-Jan-2026 07:15:51 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /Users/bamcortez/Documents/Code/BudgetTracker/partials/Head.php:1) in /Users/bamcortez/Documents/Code/BudgetTracker/controller/UserController.php on line 75
+[14-Jan-2026 07:15:51 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /Users/bamcortez/Documents/Code/BudgetTracker/partials/Head.php:1) in /Users/bamcortez/Documents/Code/BudgetTracker/utils/ResponseUtil.php on line 10
+[14-Jan-2026 07:15:51 UTC] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at /Users/bamcortez/Documents/Code/BudgetTracker/partials/Head.php:1) in /Users/bamcortez/Documents/Code/BudgetTracker/utils/ResponseUtil.php on line 11
+[14-Jan-2026 07:15:54 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /Users/bamcortez/Documents/Code/BudgetTracker/partials/Head.php:1) in /Users/bamcortez/Documents/Code/BudgetTracker/utils/ResponseUtil.php on line 10
+[14-Jan-2026 07:15:54 UTC] PHP Warning:  http_response_code(): Cannot set response code - headers already sent (output started at /Users/bamcortez/Documents/Code/BudgetTracker/partials/Head.php:1) in /Users/bamcortez/Documents/Code/BudgetTracker/utils/ResponseUtil.php on line 11

@@ -17,7 +17,7 @@ $username = $isAuthenticated ? AuthMiddleware::getUsername() : null;
       </a>
    </div>
 
-   <?php if ($currentPage === 'dashboard.php'): ?>
+   <?php if ($currentPage === 'dashboard.php' || $currentPage === 'transactions.php'): ?>
 
       <div class="flex items-center gap-4">
          <span class="text-gray-600 hidden md:block">Hi, <span class="font-bold text-rose-500">

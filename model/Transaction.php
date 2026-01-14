@@ -40,7 +40,7 @@ class Transaction
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
                 FROM transactions t
                 LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.user_id = :user_id
+                WHERE t.user_id = :user_id AND t.status = 'active'
                 ORDER BY t.date DESC, t.created_at DESC
                 LIMIT :limit OFFSET :offset";
 
@@ -59,7 +59,7 @@ class Transaction
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
                 FROM transactions t
                 LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.id = :id AND t.user_id = :user_id
+                WHERE t.id = :id AND t.user_id = :user_id AND t.status = 'active'
                 LIMIT 1";
 
       $stmt = $this->conn->prepare($query);
@@ -75,7 +75,7 @@ class Transaction
       $query = "UPDATE transactions 
                 SET category_id = :category_id, amount = :amount, type = :type, 
                     description = :description, date = :date
-                WHERE id = :id AND user_id = :user_id";
+                WHERE id = :id AND user_id = :user_id AND status = 'active'";
 
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(":id", $id, PDO::PARAM_INT);
@@ -91,7 +91,7 @@ class Transaction
 
    public function deleteTransaction($id, $userId)
    {
-      $query = "DELETE FROM transactions WHERE id = :id AND user_id = :user_id";
+      $query = "UPDATE transactions SET status = 'deleted' WHERE id = :id AND user_id = :user_id AND status = 'active'";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(":id", $id, PDO::PARAM_INT);
       $stmt->bindParam(":user_id", $userId, PDO::PARAM_INT);
@@ -103,7 +103,7 @@ class Transaction
    {
       $query = "SELECT COALESCE(SUM(amount), 0) as total 
                 FROM transactions 
-                WHERE user_id = :user_id AND type = 'income'";
+                WHERE user_id = :user_id AND type = 'income' AND status = 'active'";
 
       if ($startDate && $endDate) {
          $query .= " AND date BETWEEN :start_date AND :end_date";
@@ -127,7 +127,7 @@ class Transaction
    {
       $query = "SELECT COALESCE(SUM(amount), 0) as total 
                 FROM transactions 
-                WHERE user_id = :user_id AND type = 'expense'";
+                WHERE user_id = :user_id AND type = 'expense' AND status = 'active'";
 
       if ($startDate && $endDate) {
          $query .= " AND date BETWEEN :start_date AND :end_date";
@@ -161,7 +161,7 @@ class Transaction
                     SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income,
                     SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense
                   FROM transactions 
-                  WHERE user_id = :user_id";
+                  WHERE user_id = :user_id AND status = 'active'";
 
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':user_id', $userId);
@@ -186,7 +186,7 @@ class Transaction
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
                 FROM transactions t
                 LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.user_id = :user_id AND t.category_id = :category_id
+                WHERE t.user_id = :user_id AND t.category_id = :category_id AND t.status = 'active'
                 ORDER BY t.date DESC, t.created_at DESC
                 LIMIT :limit";
 
@@ -205,7 +205,7 @@ class Transaction
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
                 FROM transactions t
                 LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.user_id = :user_id AND t.type = :type
+                WHERE t.user_id = :user_id AND t.type = :type AND t.status = 'active'
                 ORDER BY t.date DESC, t.created_at DESC
                 LIMIT :limit";
 
@@ -247,7 +247,7 @@ class Transaction
                        SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END) as total_income,
                        COUNT(t.id) as transaction_count
                 FROM categories c
-                LEFT JOIN transactions t ON c.id = t.category_id AND t.user_id = :user_id";
+                LEFT JOIN transactions t ON c.id = t.category_id AND t.user_id = :user_id AND t.status = 'active'";
 
       if ($startDate && $endDate) {
          $query .= " AND t.date BETWEEN :start_date AND :end_date";

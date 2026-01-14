@@ -15,8 +15,9 @@ $transactionModel = new Transaction();
 $categoryModel = new Category();
 
 $stats = $transactionModel->getUserStats($userId);
-$recentTransactions = $transactionModel->getTransactionsByUser($userId, 10);
+$recentTransactions = $transactionModel->getTransactionsByUser($userId, 4);
 $categories = $categoryModel->getAllCategories();
+$categorySpending = $transactionModel->getSpendingByCategory($userId);
 $csrfToken = CsrfUtil::generateToken();
 ?>
 
@@ -49,13 +50,48 @@ $csrfToken = CsrfUtil::generateToken();
             </div>
          </div>
 
+         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-rose-100 p-8">
+               <h2 class="text-xl font-bold text-gray-800 mb-6">Expense by Category</h2>
+               <div class="relative h-[300px]">
+                  <?php if (empty($recentTransactions)): ?>
+                     <div class="flex flex-col items-center justify-center h-full">
+                        <div class="text-rose-200 mb-4">
+                           <i class="fa-solid fa-chart-pie text-5xl"></i>
+                        </div>
+                        <p class="text-gray-400 italic">No transactions found yet. Start blooming!</p>
+                     </div>
+                  <?php else: ?>
+                     <canvas id="expenseChart"></canvas>
+                  <?php endif; ?>
+               </div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-rose-100 p-8">
+               <h2 class="text-xl font-bold text-gray-800 mb-6">Income vs Expenses</h2>
+               <div class="relative h-[300px]">
+                  <?php if (empty($recentTransactions)): ?>
+                     <div class="flex flex-col items-center justify-center h-full">
+                        <div class="text-rose-200 mb-4">
+                           <i class="fa-solid fa-chart-bar text-5xl"></i>
+                        </div>
+                        <p class="text-gray-400 italic">No transactions found yet. Start blooming!</p>
+                     </div>
+                  <?php else: ?>
+                     <canvas id="incomeExpenseChart"></canvas>
+                  <?php endif; ?>
+               </div>
+            </div>
+         </div>
+
          <div class="bg-white rounded-[2.5rem] shadow-sm border border-rose-100 p-8">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                <h2 class="text-xl font-bold text-gray-800">Recent Transactions</h2>
-               <button id="openModalBtn"
-                  class="bg-rose-500 text-white px-6 py-2 rounded-full font-bold shadow-md hover:bg-rose-600 transition-all">
-                  + Add New
-               </button>
+               <a href="transactions.php"
+                  class="inline-flex items-center text-rose-500 hover:text-rose-600 font-semibold transition-colors group">
+                  View All Transactions
+                  <i class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+               </a>
             </div>
 
             <?php if (empty($recentTransactions)): ?>
@@ -74,7 +110,6 @@ $csrfToken = CsrfUtil::generateToken();
                            <th class="pb-4 font-semibold">Category</th>
                            <th class="pb-4 font-semibold">Description</th>
                            <th class="pb-4 font-semibold text-right">Amount</th>
-                           <th class="pb-4 font-semibold text-center">Action</th>
                         </tr>
                      </thead>
                      <tbody class="divide-y divide-rose-50">
@@ -103,99 +138,174 @@ $csrfToken = CsrfUtil::generateToken();
                                  class="py-4 text-right font-bold <?php echo $tx['type'] === 'income' ? 'text-emerald-600' : 'text-rose-500'; ?>">
                                  <?php echo ($tx['type'] === 'income' ? '+' : '-') . '₱' . number_format($tx['amount'], 2); ?>
                               </td>
-                              <td class="py-4 text-center">
-                                 <button onclick="deleteTransaction(<?php echo $tx['id']; ?>)"
-                                    class="text-gray-300 hover:text-rose-500 transition-colors">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                 </button>
-                              </td>
                            </tr>
                         <?php endforeach; ?>
                      </tbody>
                   </table>
                </div>
+
             <?php endif; ?>
          </div>
       </div>
    </main>
 
-   <div id="transactionModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4">
-      <div class="absolute inset-0 bg-rose-900/20 backdrop-blur-sm" onclick="closeModal()"></div>
-      <div
-         class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-rose-100 relative z-10 overflow-hidden animate-in fade-in zoom-in duration-300">
-         <div class="bg-rose-500 p-6 text-white flex justify-between items-center">
-            <h3 class="text-xl font-bold">New Transaction</h3>
-            <button onclick="closeModal()" class="hover:rotate-90 transition-transform">
-               <i class="fa-solid fa-xmark text-2xl"></i>
-            </button>
-         </div>
+   <script>
+      const categorySpending = <?php echo json_encode($categorySpending); ?>;
 
-         <form id="transactionForm" class="p-8">
-            <input type="hidden" name="add_transaction" value="1">
-            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+      const expenseCategories = categorySpending
+         .filter(cat => parseFloat(cat.total_expenses) > 0)
+         .sort((a, b) => parseFloat(b.total_expenses) - parseFloat(a.total_expenses))
+         .slice(0, 8);
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div class="space-y-5">
-                  <div>
-                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Type</label>
-                     <div class="grid grid-cols-2 gap-4">
-                        <label class="relative cursor-pointer">
-                           <input type="radio" name="type" value="expense" checked class="peer sr-only">
-                           <div
-                              class="text-center py-3 rounded-xl border border-rose-100 bg-rose-50 text-gray-600 peer-checked:bg-rose-500 peer-checked:text-white peer-checked:border-rose-500 transition-all font-bold">
-                              Expense</div>
-                        </label>
-                        <label class="relative cursor-pointer">
-                           <input type="radio" name="type" value="income" class="peer sr-only">
-                           <div
-                              class="text-center py-3 rounded-xl border border-rose-100 bg-rose-50 text-gray-600 peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-500 transition-all font-bold">
-                              Income</div>
-                        </label>
-                     </div>
-                  </div>
-                  <div>
-                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Amount</label>
-                     <div class="relative">
-                        <span class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₱</span>
-                        <input type="number" step="0.01" name="amount" required
-                           class="w-full pl-10 pr-5 py-4 rounded-2xl border border-rose-100 bg-rose-50/30 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:bg-white transition-all font-bold text-lg"
-                           placeholder="0.00">
-                     </div>
-                  </div>
-                  <div>
-                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Date</label>
-                     <input type="date" name="date" required value="<?php echo date('Y-m-d'); ?>"
-                        class="w-full px-5 py-4 rounded-2xl border border-rose-100 bg-rose-50/30 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:bg-white transition-all">
-                  </div>
-               </div>
-               <div class="space-y-5">
-                  <div>
-                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Category</label>
-                     <select name="category_id" required
-                        class="w-full px-5 py-4 rounded-2xl border border-rose-100 bg-rose-50/30 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:bg-white transition-all appearance-none">
-                        <option value="" disabled selected>Select Category</option>
-                        <?php foreach ($categories as $cat): ?>
-                           <option value="<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
-                        <?php endforeach; ?>
-                     </select>
-                  </div>
-                  <div>
-                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">Description</label>
-                     <textarea name="description" rows="4"
-                        class="w-full px-5 py-4 rounded-2xl border border-rose-100 bg-rose-50/30 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:bg-white transition-all resize-none"
-                        placeholder="What was this for?"></textarea>
-                  </div>
-               </div>
-            </div>
-            <div class="mt-8">
-               <button type="submit" id="saveBtn"
-                  class="w-full bg-rose-500 hover:bg-rose-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-rose-200 transition-all active:scale-95 flex justify-center items-center">
-                  <span id="saveBtnText">Save Transaction</span>
-               </button>
-            </div>
-         </form>
-      </div>
-   </div>
+      const expenseLabels = expenseCategories.map(cat => cat.name);
+      const expenseData = expenseCategories.map(cat => parseFloat(cat.total_expenses));
+
+      const expenseColors = [
+         '#e11d48', '#f43f5e', '#fb7185', '#fda4af',
+         '#fecdd3', '#fce7f3', '#fdf2f8', '#fff1f2'
+      ];
+
+      if (document.getElementById('expenseChart')) {
+         new Chart(document.getElementById('expenseChart'), {
+            type: 'pie',
+            data: {
+               labels: expenseLabels,
+               datasets: [{
+                  data: expenseData,
+                  backgroundColor: expenseColors,
+                  borderWidth: 2,
+                  borderColor: '#fff'
+               }]
+            },
+            options: {
+               responsive: true,
+               maintainAspectRatio: false,
+               plugins: {
+                  legend: {
+                     display: false
+                  },
+                  tooltip: {
+                     backgroundColor: '#fff',
+                     titleColor: '#1f2937',
+                     bodyColor: '#6b7280',
+                     borderColor: '#f43f5e',
+                     borderWidth: 1,
+                     padding: 12,
+                     displayColors: true,
+                     callbacks: {
+                        label: function (context) {
+                           return context.label + ': ₱' + context.parsed.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                     }
+                  }
+               }
+            }
+         });
+      }
+
+      if (document.getElementById('incomeExpenseChart')) {
+         new Chart(document.getElementById('incomeExpenseChart'), {
+            type: 'bar',
+            data: {
+               labels: ['Income', 'Expenses'],
+               datasets: [{
+                  label: 'Amount (₱)',
+                  data: [<?php echo $stats['income']; ?>, <?php echo $stats['expense']; ?>],
+                  backgroundColor: ['#10b981', '#f43f5e'],
+                  borderRadius: 12,
+                  borderWidth: 0
+               }]
+            },
+            options: {
+               responsive: true,
+               maintainAspectRatio: false,
+               plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                     backgroundColor: '#fff',
+                     titleColor: '#1f2937',
+                     bodyColor: '#6b7280',
+                     borderColor: '#e5e7eb',
+                     borderWidth: 1,
+                     padding: 12,
+                     callbacks: {
+                        label: function (context) {
+                           return '₱' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                     }
+                  }
+               },
+               scales: {
+                  y: {
+                     beginAtZero: true,
+                     ticks: {
+                        callback: function (value) {
+                           return '₱' + value.toLocaleString('en-US', { minimumFractionDigits: 0 });
+                        },
+                        font: { size: 11, weight: '600' },
+                        color: '#6b7280'
+                     },
+                     grid: {
+                        color: '#f3f4f6',
+                        drawBorder: false
+                     }
+                  },
+                  x: {
+                     ticks: {
+                        font: { size: 13, weight: '700' },
+                        color: '#374151'
+                     },
+                     grid: { display: false }
+                  }
+               }
+            }
+         });
+      }
+   </script>
+
+   <script>
+      if (document.getElementById("logoutForm")) {
+         document.getElementById("logoutForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const result = await Swal.fire({
+               title: 'Logout?',
+               text: "Are you sure you want to logout? 🌸",
+               icon: 'question',
+               showCancelButton: true,
+               confirmButtonColor: '#f43f5e',
+               cancelButtonColor: '#6b7280',
+               confirmButtonText: 'Yes, logout',
+               cancelButtonText: 'Cancel'
+            });
+
+            if (!result.isConfirmed) return;
+
+            const logoutBtn = this.querySelector("button");
+            logoutBtn.disabled = true;
+            logoutBtn.innerText = "Logging out...";
+
+            try {
+               const response = await fetch("routes/UserRoutes.php", {
+                  method: "POST",
+                  body: new FormData(this),
+               });
+               const result = await response.json();
+               if (result.status === "success") {
+                  window.location.href = "index.php";
+               } else {
+                  showToast(result.message || "Logout failed.", "error");
+                  logoutBtn.disabled = false;
+                  logoutBtn.innerText = "Logout";
+               }
+            } catch (error) {
+               showToast("Logout failed.", "error");
+               logoutBtn.disabled = false;
+               logoutBtn.innerText = "Logout";
+            }
+         });
+      }
+   </script>
 
    <script src="assets/js/dashboard.js"></script>
 
