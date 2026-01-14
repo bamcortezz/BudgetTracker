@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../config/Config.php"; // has session_start();
+require_once __DIR__ . "/../config/Config.php";
 require_once __DIR__ . "/../model/User.php";
 require_once __DIR__ . "/../utils/ResponseUtil.php";
 require_once __DIR__ . "/../utils/CsrfUtil.php";
@@ -14,14 +14,18 @@ class UserController
       $this->userModel = new User();
    }
 
-   public function register($username, $email, $password, $csrfToken)
+   public function register($username, $email, $password, $confirmPassword, $csrfToken)
    {
       if (!CsrfUtil::verifyToken($csrfToken)) {
          ResponseUtil::error("Invalid CSRF token", 403);
       }
 
-      if (empty($username) || empty($email) || empty($password)) {
+      if (empty($username) || empty($email) || empty($password) || empty($confirmPassword)) {
          ResponseUtil::error("All fields are required");
+      }
+
+      if ($password !== $confirmPassword) {
+         ResponseUtil::error("Passwords do not match");
       }
 
       if ($this->userModel->isEmailExists($email)) {
@@ -45,15 +49,41 @@ class UserController
          ResponseUtil::error("Email and password are required");
       }
 
-      $user = $this->userModel->login($email, $password);
+      $user = $this->userModel->getUserByEmail($email);
 
-      if ($user) {
-         $_SESSION['user_id'] = $user['id'];
-         $_SESSION['username'] = $user['username'];
-
-         ResponseUtil::success("Login successful", $user);
+      if (!$user) {
+         ResponseUtil::error("Email not found", 404);
       }
 
-      ResponseUtil::error("Invalid email or password", 401);
+      if (!password_verify($password, $user['password'])) {
+         ResponseUtil::error("Incorrect password", 401);
+      }
+
+      $_SESSION['user_id'] = $user['id'];
+      $_SESSION['username'] = $user['username'];
+
+      unset($user['password']);
+      ResponseUtil::success("Login successful", $user);
+   }
+
+   public function logout()
+   {
+      $_SESSION = array();
+
+      if (ini_get("session.use_cookies")) {
+         $params = session_get_cookie_params();
+         setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+         );
+      }
+
+      session_destroy();
+      ResponseUtil::success("Logged out successfully");
    }
 }

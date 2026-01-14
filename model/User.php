@@ -29,21 +29,14 @@ class User
       return false;
    }
 
-   public function login($email, $password)
+   public function getUserByEmail($email)
    {
       $query = "SELECT id, username, email, password FROM users WHERE email = :email LIMIT 1";
-
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(":email", $email);
       $stmt->execute();
 
-      $user = $stmt->fetch();
-
-      if ($user && password_verify($password, $user['password'])) {
-         unset($user['password']);
-         return $user;
-      }
-      return false;
+      return $stmt->fetch();
    }
 
    public function isEmailExists($email)

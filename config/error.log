@@ -1,0 +1,19 @@
+[14-Jan-2026 05:33:27 UTC] PHP Fatal error:  Uncaught Error: Class "CsrfUtil" not found in /Users/bamcortez/Documents/Code/BudgetTracker/register.php:31
+Stack trace:
+#0 {main}
+  thrown in /Users/bamcortez/Documents/Code/BudgetTracker/register.php on line 31
+[14-Jan-2026 05:33:29 UTC] PHP Fatal error:  Uncaught Error: Class "CsrfUtil" not found in /Users/bamcortez/Documents/Code/BudgetTracker/register.php:31
+Stack trace:
+#0 {main}
+  thrown in /Users/bamcortez/Documents/Code/BudgetTracker/register.php on line 31
+[14-Jan-2026 05:33:35 UTC] PHP Fatal error:  Uncaught Error: Class "CsrfUtil" not found in /Users/bamcortez/Documents/Code/BudgetTracker/register.php:31
+Stack trace:
+#0 {main}
+  thrown in /Users/bamcortez/Documents/Code/BudgetTracker/register.php on line 31
+[14-Jan-2026 05:35:41 UTC] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /Users/bamcortez/Documents/Code/BudgetTracker/model/User.php:52
+Stack trace:
+#0 /Users/bamcortez/Documents/Code/BudgetTracker/controller/UserController.php(27): User->isEmailExists('francisemil.cor...')
+#1 /Users/bamcortez/Documents/Code/BudgetTracker/routes/UserRoutes.php(15): UserController->register('Bam Cortez', 'francisemil.cor...', '123', 'd3f12506ea4fbbb...')
+#2 {main}
+  thrown in /Users/bamcortez/Documents/Code/BudgetTracker/model/User.php on line 52
+[14-Jan-2026 05:38:32 UTC] Database Connection Error: SQLSTATE[HY000] [2002] No such file or directory

@@ -10,9 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $username = isset($_POST['username']) ? trim($_POST['username']) : null;
       $email = isset($_POST['email']) ? trim($_POST['email']) : null;
       $password = isset($_POST['password']) ? $_POST['password'] : null;
+      $confirmPassword = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : null;
       $csrfToken = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : null;
 
-      $UserController->register($username, $email, $password, $csrfToken);
+      $UserController->register($username, $email, $password, $confirmPassword, $csrfToken);
    }
 
    if (isset($_POST['login'])) {
