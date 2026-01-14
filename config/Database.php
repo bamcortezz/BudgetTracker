@@ -5,6 +5,7 @@ class Database
    private $db_name = "budget_tracker";
    private $username = "root";
    private $password = "";
+   private $host = "localhost";
    private $socket = "/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock";
    public $conn;
 
@@ -13,7 +14,13 @@ class Database
       $this->conn = null;
 
       try {
-         $dsn = "mysql:unix_socket={$this->socket};dbname={$this->db_name};charset=utf8mb4";
+         // Check if socket exists (local XAMPP environment)
+         if (file_exists($this->socket)) {
+            $dsn = "mysql:unix_socket={$this->socket};dbname={$this->db_name};charset=utf8mb4";
+         } else {
+            // Use standard host:port connection (for production/shared hosting)
+            $dsn = "mysql:host={$this->host};dbname={$this->db_name};charset=utf8mb4";
+         }
 
          $this->conn = new PDO($dsn, $this->username, $this->password);
 
@@ -27,12 +34,7 @@ class Database
             require_once __DIR__ . '/../utils/ResponseUtil.php';
          }
 
-         $errorMessage = "Database connection failed.";
-         if (!file_exists($this->socket)) {
-            $errorMessage .= " MySQL socket not found. Please start MySQL in XAMPP.";
-         }
-
-         ResponseUtil::error($errorMessage, 500);
+         ResponseUtil::error("Database connection failed. Please check your configuration.", 500);
       }
 
       return $this->conn;

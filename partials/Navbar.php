@@ -8,7 +8,7 @@ $username = $isAuthenticated ? AuthMiddleware::getUsername() : null;
 <nav
    class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center shadow-sm fixed w-full top-0 z-50">
    <div class="flex items-center gap-2">
-      <a href="<?php echo ($isAuthenticated && $currentPage === 'dashboard.php') ? 'dashboard.php' : 'index.php'; ?>"
+      <a href="<?php echo ($isAuthenticated && $currentPage === 'dashboard.php') ? 'dashboard.php' : '/'; ?>"
          class="flex items-center gap-2">
          <div class="bg-rose-400 p-2 rounded-lg text-white">
             <i class="fa-solid fa-wallet text-sm"></i>

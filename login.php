@@ -58,7 +58,7 @@ require_once __DIR__ . "/partials/Head.php";
          </div>
 
          <div class="text-center mt-8">
-            <a href="index.php" class="text-rose-400 hover:text-rose-600 text-sm font-medium transition-colors">
+            <a href="/" class="text-rose-400 hover:text-rose-600 text-sm font-medium transition-colors">
                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Home
             </a>
          </div>

@@ -292,7 +292,7 @@ $csrfToken = CsrfUtil::generateToken();
                });
                const result = await response.json();
                if (result.status === "success") {
-                  window.location.href = "index.php";
+                  window.location.href = "/";
                } else {
                   showToast(result.message || "Logout failed.", "error");
                   logoutBtn.disabled = false;
