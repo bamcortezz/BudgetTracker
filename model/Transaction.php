@@ -4,6 +4,7 @@ require_once __DIR__ . "/../config/Database.php";
 class Transaction
 {
    private $conn;
+   private $table_name = "transactions";
 
    public function __construct()
    {
@@ -17,7 +18,7 @@ class Transaction
          $date = date('Y-m-d');
       }
 
-      $query = "INSERT INTO transactions (user_id, category_id, amount, type, description, date) 
+      $query = "INSERT INTO " . $this->table_name . " (user_id, category_id, amount, type, description, date) 
                 VALUES (:user_id, :category_id, :amount, :type, :description, :date)";
       $stmt = $this->conn->prepare($query);
 
@@ -38,7 +39,7 @@ class Transaction
    {
       $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name, 
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM transactions t
+                FROM " . $this->table_name . " t
                 LEFT JOIN categories c ON t.category_id = c.id
                 WHERE t.user_id = :user_id AND t.status = 'active'
                 ORDER BY t.date DESC, t.created_at DESC
@@ -57,7 +58,7 @@ class Transaction
    {
       $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name,
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM transactions t
+                FROM " . $this->table_name . " t
                 LEFT JOIN categories c ON t.category_id = c.id
                 WHERE t.id = :id AND t.user_id = :user_id AND t.status = 'active'
                 LIMIT 1";
@@ -72,7 +73,7 @@ class Transaction
 
    public function updateTransaction($id, $userId, $categoryId, $amount, $type, $description = null, $date = null)
    {
-      $query = "UPDATE transactions 
+      $query = "UPDATE " . $this->table_name . " 
                 SET category_id = :category_id, amount = :amount, type = :type, 
                     description = :description, date = :date
                 WHERE id = :id AND user_id = :user_id AND status = 'active'";
@@ -91,7 +92,7 @@ class Transaction
 
    public function deleteTransaction($id, $userId)
    {
-      $query = "UPDATE transactions SET status = 'deleted' WHERE id = :id AND user_id = :user_id AND status = 'active'";
+      $query = "UPDATE " . $this->table_name . " SET status = 'deleted' WHERE id = :id AND user_id = :user_id AND status = 'active'";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(":id", $id, PDO::PARAM_INT);
       $stmt->bindParam(":user_id", $userId, PDO::PARAM_INT);
@@ -102,7 +103,7 @@ class Transaction
    public function getTotalIncome($userId, $startDate = null, $endDate = null)
    {
       $query = "SELECT COALESCE(SUM(amount), 0) as total 
-                FROM transactions 
+                FROM " . $this->table_name . " 
                 WHERE user_id = :user_id AND type = 'income' AND status = 'active'";
 
       if ($startDate && $endDate) {
@@ -126,7 +127,7 @@ class Transaction
    public function getTotalExpenses($userId, $startDate = null, $endDate = null)
    {
       $query = "SELECT COALESCE(SUM(amount), 0) as total 
-                FROM transactions 
+                FROM " . $this->table_name . " 
                 WHERE user_id = :user_id AND type = 'expense' AND status = 'active'";
 
       if ($startDate && $endDate) {
@@ -160,7 +161,7 @@ class Transaction
       $query = "SELECT 
                     SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income,
                     SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense
-                  FROM transactions 
+                  FROM " . $this->table_name . " 
                   WHERE user_id = :user_id AND status = 'active'";
 
       $stmt = $this->conn->prepare($query);
@@ -184,7 +185,7 @@ class Transaction
    {
       $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name,
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM transactions t
+                FROM " . $this->table_name . " t
                 LEFT JOIN categories c ON t.category_id = c.id
                 WHERE t.user_id = :user_id AND t.category_id = :category_id AND t.status = 'active'
                 ORDER BY t.date DESC, t.created_at DESC
@@ -203,7 +204,7 @@ class Transaction
    {
       $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name,
                        t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM transactions t
+                FROM " . $this->table_name . " t
                 LEFT JOIN categories c ON t.category_id = c.id
                 WHERE t.user_id = :user_id AND t.type = :type AND t.status = 'active'
                 ORDER BY t.date DESC, t.created_at DESC
@@ -247,7 +248,7 @@ class Transaction
                        SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END) as total_income,
                        COUNT(t.id) as transaction_count
                 FROM categories c
-                LEFT JOIN transactions t ON c.id = t.category_id AND t.user_id = :user_id AND t.status = 'active'";
+                LEFT JOIN " . $this->table_name . " t ON c.id = t.category_id AND t.user_id = :user_id AND t.status = 'active'";
 
       if ($startDate && $endDate) {
          $query .= " AND t.date BETWEEN :start_date AND :end_date";

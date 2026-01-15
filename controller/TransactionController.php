@@ -90,7 +90,7 @@ class TransactionController
       $transactions = $this->transactionModel->getTransactionsByUser($userId, $perPage, $offset);
 
       $totalQuery = "SELECT COUNT(*) as total FROM transactions WHERE user_id = :user_id AND status = 'active'";
-      $database = new Database();
+      $database = new Database(); 
       $conn = $database->getConnection();
       $stmt = $conn->prepare($totalQuery);
       $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);

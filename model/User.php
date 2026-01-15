@@ -5,6 +5,7 @@ require_once __DIR__ . "/../config/Database.php";
 class User
 {
    private $conn;
+   private $table_name = "users";
 
    public function __construct()
    {
@@ -14,7 +15,7 @@ class User
 
    public function register($username, $email, $password)
    {
-      $query = "INSERT INTO users (username, email, password) VALUES (:username, :email, :password)";
+      $query = "INSERT INTO " . $this->table_name . " (username, email, password) VALUES (:username, :email, :password)";
       $stmt = $this->conn->prepare($query);
 
       $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
@@ -31,7 +32,7 @@ class User
 
    public function getUserByEmail($email)
    {
-      $query = "SELECT id, username, email, password FROM users WHERE email = :email LIMIT 1";
+      $query = "SELECT id, username, email, password FROM " . $this->table_name . " WHERE email = :email LIMIT 1";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(":email", $email);
       $stmt->execute();
@@ -39,9 +40,19 @@ class User
       return $stmt->fetch();
    }
 
+   public function getUserById($id)
+   {
+      $query = "SELECT id, username, email, password FROM " . $this->table_name . " WHERE id = :id LIMIT 1";
+      $stmt = $this->conn->prepare($query);
+      $stmt->bindParam(":id", $id);
+      $stmt->execute();
+
+      return $stmt->fetch();
+   }
+
    public function isEmailExists($email)
    {
-      $query = "SELECT id FROM users WHERE email = :email LIMIT 1";
+      $query = "SELECT id FROM " . $this->table_name . " WHERE email = :email LIMIT 1";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(":email", $email);
       $stmt->execute();
