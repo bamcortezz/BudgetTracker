@@ -121,7 +121,7 @@ $csrfToken = CsrfUtil::generateToken();
                               <td class="py-4">
                                  <?php
                                  $categoryName = $tx['category_name'];
-                                 $isIncome = in_array($categoryName, ['Salary', 'Freelance', 'Investment']);
+                                 $isIncome = in_array($categoryName, ['Salary', 'Freelance', 'Investment', 'Allowance']);
                                  $badgeClasses = $isIncome
                                     ? 'bg-emerald-100 text-emerald-600'
                                     : 'bg-rose-100 text-rose-600';
