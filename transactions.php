@@ -24,7 +24,7 @@ $csrfToken = CsrfUtil::generateToken();
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $perPage = 15;
 
-$paginationData = $transactionController->getPaginationData($userId, $page, $perPage);
+$paginationData = $transactionModel->getPaginationData($userId, $page, $perPage);
 $allTransactions = $paginationData['transactions'];
 $totalRecords = $paginationData['totalRecords'];
 $totalPages = $paginationData['totalPages'];

@@ -267,4 +267,66 @@ class Transaction
       $stmt->execute();
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
    }
+
+   public function getPaginationData($userId, $page = 1, $perPage = 15)
+   {
+      $offset = ($page - 1) * $perPage;
+      $transactions = $this->getTransactionsByUser($userId, $perPage, $offset);
+
+      $totalQuery = "SELECT COUNT(*) as total FROM " . $this->table_name . " WHERE user_id = :user_id AND status = 'active'";
+      $stmt = $this->conn->prepare($totalQuery);
+      $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+      $stmt->execute();
+      $totalRecords = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+      $totalPages = ceil($totalRecords / $perPage);
+
+      // Generate pagination links (always show, even for 1 page)
+      $paginationLinks = [];
+      $startPage = max(1, $page - 2);
+      $endPage = min($totalPages, $page + 2);
+
+      // First page and ellipsis
+      if ($startPage > 1) {
+         $paginationLinks[] = [
+            'type' => 'link',
+            'page' => 1,
+            'label' => '1',
+            'active' => false
+         ];
+         if ($startPage > 2) {
+            $paginationLinks[] = ['type' => 'ellipsis'];
+         }
+      }
+
+      // Page range
+      for ($i = $startPage; $i <= $endPage; $i++) {
+         $paginationLinks[] = [
+            'type' => 'link',
+            'page' => $i,
+            'label' => (string) $i,
+            'active' => $i === $page
+         ];
+      }
+
+      // Last page and ellipsis
+      if ($endPage < $totalPages) {
+         if ($endPage < $totalPages - 1) {
+            $paginationLinks[] = ['type' => 'ellipsis'];
+         }
+         $paginationLinks[] = [
+            'type' => 'link',
+            'page' => $totalPages,
+            'label' => (string) $totalPages,
+            'active' => false
+         ];
+      }
+
+      return [
+         'transactions' => $transactions,
+         'totalRecords' => $totalRecords,
+         'totalPages' => $totalPages,
+         'currentPage' => $page,
+         'paginationLinks' => $paginationLinks
+      ];
+   }
 }
