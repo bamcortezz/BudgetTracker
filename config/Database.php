@@ -29,12 +29,6 @@ class Database
 
       } catch (PDOException $exception) {
          error_log("Database Connection Error: " . $exception->getMessage());
-
-         if (!class_exists('ResponseUtil')) {
-            require_once __DIR__ . '/../utils/ResponseUtil.php';
-         }
-
-         ResponseUtil::error("Database connection failed. Please check your configuration.", 500);
       }
 
       return $this->conn;

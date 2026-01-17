@@ -40,16 +40,6 @@ class User
       return $stmt->fetch();
    }
 
-   public function getUserById($id)
-   {
-      $query = "SELECT id, username, email, password FROM " . $this->table_name . " WHERE id = :id LIMIT 1";
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(":id", $id);
-      $stmt->execute();
-
-      return $stmt->fetch();
-   }
-
    public function isEmailExists($email)
    {
       $query = "SELECT id FROM " . $this->table_name . " WHERE email = :email LIMIT 1";

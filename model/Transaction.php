@@ -54,42 +54,6 @@ class Transaction
       return $stmt->fetchAll(PDO::FETCH_ASSOC);
    }
 
-   public function getTransactionById($id, $userId)
-   {
-      $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name,
-                       t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM " . $this->table_name . " t
-                LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.id = :id AND t.user_id = :user_id AND t.status = 'active'
-                LIMIT 1";
-
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-      $stmt->bindParam(":user_id", $userId, PDO::PARAM_INT);
-      $stmt->execute();
-
-      return $stmt->fetch(PDO::FETCH_ASSOC);
-   }
-
-   public function updateTransaction($id, $userId, $categoryId, $amount, $type, $description = null, $date = null)
-   {
-      $query = "UPDATE " . $this->table_name . " 
-                SET category_id = :category_id, amount = :amount, type = :type, 
-                    description = :description, date = :date
-                WHERE id = :id AND user_id = :user_id AND status = 'active'";
-
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-      $stmt->bindParam(":user_id", $userId, PDO::PARAM_INT);
-      $stmt->bindParam(":category_id", $categoryId, PDO::PARAM_INT);
-      $stmt->bindParam(":amount", $amount);
-      $stmt->bindParam(":type", $type);
-      $stmt->bindParam(":description", $description);
-      $stmt->bindParam(":date", $date);
-
-      return $stmt->execute();
-   }
-
    public function deleteTransaction($id, $userId)
    {
       $query = "UPDATE " . $this->table_name . " SET status = 'deleted' WHERE id = :id AND user_id = :user_id AND status = 'active'";
@@ -148,14 +112,6 @@ class Transaction
       return (float) $result['total'];
    }
 
-   public function getBalance($userId, $startDate = null, $endDate = null)
-   {
-      $income = $this->getTotalIncome($userId, $startDate, $endDate);
-      $expenses = $this->getTotalExpenses($userId, $startDate, $endDate);
-
-      return $income - $expenses;
-   }
-
    public function getUserStats($userId)
    {
       $query = "SELECT 
@@ -178,66 +134,6 @@ class Transaction
          'balance' => $balance,
          'income' => $income,
          'expense' => $expense
-      ];
-   }
-
-   public function getTransactionsByCategory($userId, $categoryId, $limit = 50)
-   {
-      $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name,
-                       t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM " . $this->table_name . " t
-                LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.user_id = :user_id AND t.category_id = :category_id AND t.status = 'active'
-                ORDER BY t.date DESC, t.created_at DESC
-                LIMIT :limit";
-
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(":user_id", $userId, PDO::PARAM_INT);
-      $stmt->bindParam(":category_id", $categoryId, PDO::PARAM_INT);
-      $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
-      $stmt->execute();
-
-      return $stmt->fetchAll(PDO::FETCH_ASSOC);
-   }
-
-   public function getTransactionsByType($userId, $type, $limit = 50)
-   {
-      $query = "SELECT t.id, t.user_id, t.category_id, c.name as category_name,
-                       t.amount, t.type, t.description, t.date, t.created_at, t.updated_at
-                FROM " . $this->table_name . " t
-                LEFT JOIN categories c ON t.category_id = c.id
-                WHERE t.user_id = :user_id AND t.type = :type AND t.status = 'active'
-                ORDER BY t.date DESC, t.created_at DESC
-                LIMIT :limit";
-
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(":user_id", $userId, PDO::PARAM_INT);
-      $stmt->bindParam(":type", $type);
-      $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
-      $stmt->execute();
-
-      return $stmt->fetchAll(PDO::FETCH_ASSOC);
-   }
-
-   public function getMonthlySummary($userId, $year = null, $month = null)
-   {
-      if (!$year)
-         $year = date('Y');
-      if (!$month)
-         $month = date('m');
-
-      $startDate = date('Y-m-01', strtotime("$year-$month-01"));
-      $endDate = date('Y-m-t', strtotime("$year-$month-01"));
-
-      $income = $this->getTotalIncome($userId, $startDate, $endDate);
-      $expenses = $this->getTotalExpenses($userId, $startDate, $endDate);
-
-      return [
-         'income' => $income,
-         'expenses' => $expenses,
-         'balance' => $income - $expenses,
-         'year' => $year,
-         'month' => $month
       ];
    }
 

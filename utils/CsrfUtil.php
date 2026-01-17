@@ -20,9 +20,4 @@ class CsrfUtil
 
       return true;
    }
-
-   public static function getToken()
-   {
-      return $_SESSION['csrf_token'];
-   }
 }

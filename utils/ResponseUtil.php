@@ -4,9 +4,6 @@ class ResponseUtil
 {
    public static function sendJson($data, $statusCode = 200)
    {
-      if (ob_get_level())
-         ob_end_clean();
-
       header('Content-Type: application/json; charset=utf-8');
       http_response_code($statusCode);
 
@@ -14,9 +11,6 @@ class ResponseUtil
       exit;
    }
 
-   /**
-    * Standard Success Response
-    */
    public static function success($message = "Success", $data = [], $statusCode = 200)
    {
       self::sendJson([
@@ -26,9 +20,6 @@ class ResponseUtil
       ], $statusCode);
    }
 
-   /**
-    * Standard Error Response
-    */
    public static function error($message = "An error occurred", $statusCode = 400, $data = null)
    {
       self::sendJson([
